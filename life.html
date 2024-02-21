@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<head>
+  <title>Life</title>
+</head>
+<body>
+<canvas id="life" width="1000" height="500"></canvas>
+<script>
+
+  let map = document.getElementById("life").getContext('2d');
+
+  function draw(x, y, color, s) {
+    map.fillStyle = color;
+    map.fillRect(x, y, s, s);
+  }
+
+  let particles = [];
+
+  function particle(x, y, color) {
+    return {"x": x, "y": y, "vx": 0, "vy": 0, "color": color};
+  }
+
+  function random500() {
+    return Math.random() * 400 + 50;
+  }
+
+  function random1000() {
+    return Math.random() * 900 + 50;
+  }
+
+  function create(number, color) {
+    let group = [];
+    for (let i = 0; i < number; i++) {
+      group.push(particle(random1000(), random500(), color));
+      particles.push(group[i]);
+    }
+    return group;
+  }
+
+  function rule(particles1, particles2, gravity) {
+    for (let i = 0; i < particles1.length; i++) {
+      let fx = 0;
+      let fy = 0;
+      let a = particles1[i];
+      for (let j = 0; j < particles2.length; j++) {
+        let b = particles2[j];
+        let dx = a.x - b.x;
+        let dy = a.y - b.y;
+        let d = Math.sqrt(dx * dx + dy * dy);
+        if (d > 0 && d < 80) {
+          let F = gravity * 1 / d;
+          fx += (F * dx);
+          fy += (F * dy);
+        }
+      }
+      a.vx = (a.vx + fx) * 0.5;
+      a.vy = (a.vy + fy) * 0.5;
+      a.x += a.vx;
+      a.y += a.vy;
+      if (a.x <= 0 || a.x >= 1000) { a.vx *=-1; }
+      if (a.y <= 0 || a.y >= 500) { a.vy *=-1; }
+    }
+  }
+
+  const red = create(500, "red");
+  const yellow = create(800, "yellow");
+  const green = create(1400, "green");
+  const blue = create(100, "blue");
+
+  function update() {
+    rule(blue, blue, 0.05)
+    rule(blue, yellow, -0.22)
+    rule(blue, red, -0.1)
+    rule(yellow, blue, 0.15)
+    rule(yellow, yellow, -0.001)
+    rule(red, blue, -0.42)
+    rule(red, red, -0.1)
+    rule(green, blue, 0.3)
+    rule(green, green, -0.42)
+    rule(green, yellow, 0.01)
+
+    map.clearRect(0, 0, 500, 1000);
+    draw(0, 0, "black", 1000);
+    for (let i = 0; i < particles.length; i++) {
+      draw(particles[i].x, particles[i].y, particles[i].color, 5);
+    }
+    requestAnimationFrame(update);
+  }
+
+  update();
+
+</script>
+</body>
